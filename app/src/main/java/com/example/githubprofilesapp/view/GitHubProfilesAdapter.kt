@@ -20,9 +20,7 @@ class GitHubProfilesAdapter(private val mContext: Context, private var repoList:
        return repoList.size
     }
     fun updateList(newList: List<GHRepo>) {
-        Toast.makeText(mContext,"Reports List size is "+repoList.size,Toast.LENGTH_SHORT).show()
         repoList = newList
-        Toast.makeText(mContext,"new Reposts List size is "+repoList.size,Toast.LENGTH_SHORT).show()
         notifyDataSetChanged()
     }
     override fun onBindViewHolder(holder: ProfilesViewHolder, position: Int) {
