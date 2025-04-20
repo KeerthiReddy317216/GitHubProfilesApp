@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">GitHubProfilesApp</string>
+    <string name="error_view_title">No Data Found</string>
+    <string name="repo_id_text">Id </string>
+    <string name="repo_Name_text">Name </string>
+    <string name="repo_concat"> :  </string>
+</resources>
