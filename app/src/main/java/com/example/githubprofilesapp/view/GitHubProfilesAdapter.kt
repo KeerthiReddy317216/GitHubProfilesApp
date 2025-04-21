@@ -3,7 +3,6 @@ package com.example.githubprofilesapp.view
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.githubprofilesapp.R
 import com.example.githubprofilesapp.databinding.GithubProfilesItemBinding

@@ -9,12 +9,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.githubprofilesapp.databinding.ActivityMainBinding
 import com.example.githubprofilesapp.model.GHRepo
+import com.example.githubprofilesapp.utils.ResultState
 import com.example.githubprofilesapp.view.GitHubProfilesAdapter
 import com.example.githubprofilesapp.view.WebViewFragment
 import com.example.githubprofilesapp.viewmodel.GHProfileViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -39,15 +38,22 @@ class MainActivity : AppCompatActivity() {
             it.layoutManager = LinearLayoutManager(this)
             it.adapter = adapter
         }
+        viewModel.getRepositories()
         lifecycleScope.launch {
-            viewModel.getRepositories(applicationContext).collect { list ->
-                repoList = list
-                searchResults = repoList
-                if(list.isNotEmpty()) {
-                    adapter.updateList(repoList)
-                }else{
-                    withContext(Dispatchers.Main) {
+            viewModel.repos.collect { state ->
+                when (state) {
+                    is ResultState.Loading -> {
+                      binding.errorView.visibility = VISIBLE
+                        binding.errorView.text = getString(R.string.loading)
+                    }
+                    is ResultState.Success -> {
+                        binding.errorView.visibility = GONE
+                         repoList = state.data
+                        adapter.updateList(repoList)
+                    }
+                    is ResultState.Error -> {
                         binding.errorView.visibility = VISIBLE
+                        binding.errorView.text = state.message
                     }
                 }
             }
@@ -85,6 +91,7 @@ class MainActivity : AppCompatActivity() {
         if(searchResults.isNotEmpty()) {
             binding.errorView.visibility = GONE
         }else{
+            binding.errorView.text = getString(R.string.error_view_title)
            binding.errorView.visibility = VISIBLE
         }
         adapter.updateList(searchResults)

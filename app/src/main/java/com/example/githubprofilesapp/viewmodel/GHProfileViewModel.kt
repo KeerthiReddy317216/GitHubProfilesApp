@@ -1,40 +1,31 @@
 package com.example.githubprofilesapp.viewmodel
 
-import android.content.Context
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.githubprofilesapp.model.GHRepo
+import com.example.githubprofilesapp.model.repository.GitProfileRepository
 import com.example.githubprofilesapp.model.retrofit.RetrofitInstance
 import com.example.githubprofilesapp.room.GHRepoDatabase
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import com.example.githubprofilesapp.utils.ResultState
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
-class GHProfileViewModel : ViewModel() {
-    private var storedList : List<GHRepo> = emptyList()
-    fun getRepositories(mContext: Context): Flow<List<GHRepo>> = flow {
-        val dao = GHRepoDatabase.getInstance(mContext).getDao()
-        //Getting the stored repositories data if the list is empty then getting from the network call
-
-        storedList = withContext(Dispatchers.IO){
-            dao.getAllGitRepos()
-        }
-        if(storedList.isNotEmpty()){
-            emit(storedList)
-        }
-        else {
-            val response = RetrofitInstance.networkService.getGHRepos()
-
-            if (response.isSuccessful && response.body()?.items != null) {
-                emit(response.body()!!.items)
-                viewModelScope.launch(Dispatchers.IO) {
-                    dao.insertAllGitRepos(response.body()!!.items)
-                }
-            } else {
-                emit(emptyList())
+class GHProfileViewModel(application:Application) : AndroidViewModel(application) {
+    private val repository: GitProfileRepository
+    private val _repos = MutableStateFlow<ResultState<List<GHRepo>>>(ResultState.Loading)
+    val repos: StateFlow<ResultState<List<GHRepo>>> = _repos
+    init {
+        val dao = GHRepoDatabase.getInstance(application).getDao()
+        repository = GitProfileRepository(dao, RetrofitInstance.networkService)
+    }
+    fun getRepositories() {
+        viewModelScope.launch {
+            repository.getRepositories().collect {
+                _repos.value = it
             }
         }
+
     }
 }

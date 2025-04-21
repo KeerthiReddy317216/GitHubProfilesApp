@@ -4,4 +4,5 @@
     <string name="repo_id_text">Id </string>
     <string name="repo_Name_text">Name </string>
     <string name="repo_concat"> :  </string>
+    <string name="loading"> Loading data.. please wait</string>
 </resources>
